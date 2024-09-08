@@ -6,7 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
 use App\Http\Traits\CanLoadRelationships;
 use App\Models\Event;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Request;
 
 class EventController extends Controller
@@ -19,6 +18,7 @@ class EventController extends Controller
     public function __construct()
     {
         $this->middleware('auth:sanctum')->except(['index', 'show']);
+        $this->authorizeResource(Event::class, 'event');
     }
 
     /**
@@ -26,9 +26,7 @@ class EventController extends Controller
      */
     public function index()
     {
-
         $query = $this->loadRelationships(Event::query());
-
 
         return EventResource::collection(
             $query->latest()->paginate()
@@ -67,8 +65,6 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        $this->authorize('update-event', $event);
-
         $event->update($request->validate([
             'name' => 'sometimes|string|max:255',
             'desc' => 'nullable|string',
